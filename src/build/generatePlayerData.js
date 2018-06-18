@@ -1,6 +1,8 @@
 const fs = require('fs');
 const _ = require('lodash');
-const hotsAPI = require('./HotSAPI');
+const hotsAPI = require('../api');
+
+const generatedDir = `${__dirname}/../generated`;
 
 
 const players = {
@@ -19,11 +21,22 @@ const players = {
 };
 
 async function getReplays(params) {
+    console.log(`generatePlayerData::getReplays`);
     return await hotsAPI.getReplays({ params });
 }
 
-function writeToPlayerFile(fileName, data) {
-    fs.writeFile(`../generated/playerData/${fileName}.json`, data, (err) => {
+function writeToPlayerFile(dirName, fileName, data) {
+    console.log(`generatePlayerData::writeToPlayerFile - dirName: ${dirName} fileName: ${fileName}`);
+    const playerDataDir = `${generatedDir}/playerData`;
+    if (!fs.existsSync(`${playerDataDir}`)) {
+        fs.mkdirSync(playerDataDir);
+    }
+    const newDir = `${playerDataDir}/${dirName}`;
+    if (!fs.existsSync(`${newDir}`)) {
+        fs.mkdirSync(newDir);
+    }
+
+    fs.writeFile(`${newDir}/${fileName}.json`, data, (err) => {
         console.log(err);
     });
 }
@@ -48,7 +61,11 @@ function groupByHero(replays, blizzID) {
             .value()
 }
 
-function retrieveAndWritePlayerData() {
+function generatePlayerData() {
+    console.log(`generatePlayerData::generatePlayerData`);
+    if (!fs.existsSync(generatedDir)) {
+        fs.mkdirSync(generatedDir);
+    }
 
     Object.entries(players).forEach(async ([player, blizzID]) => {
         const replays = await getReplays({
@@ -57,12 +74,14 @@ function retrieveAndWritePlayerData() {
             player,
             with_players: true
         });
+
         const filterdReplays = replays.filter((replay) => {
             return replay.players.some((matchPlayer) => matchPlayer.blizz_id === blizzID)
         });
-        writeToPlayerFile(`gameType/${player}`, JSON.stringify(groupByGameType(filterdReplays)));
-        writeToPlayerFile(`hero/${player}`, JSON.stringify(groupByHero(filterdReplays, blizzID)));
+
+        writeToPlayerFile('gameType', player, JSON.stringify(groupByGameType(filterdReplays)));
+        writeToPlayerFile('hero', player, JSON.stringify(groupByHero(filterdReplays, blizzID)));
     });
 }
 
-retrieveAndWritePlayerData();
+module.exports = generatePlayerData;

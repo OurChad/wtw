@@ -1,12 +1,14 @@
 const fs = require('fs');
 const _ = require('lodash');
 const axios = require('axios');
-const hotsAPI = require('./HotSAPI');
+const hotsAPI = require('../api');
 
-const heroDataDir = '../generated/heroData';
+const generatedDir = `${__dirname}/../generated`;
+const heroDataDir = `${generatedDir}/heroData`;
 let heroList = [];
 
 async function getHeroes() {
+    console.log(`generateHeroData::getHeroes`);
     return await hotsAPI.getHeroes();
 }
 
@@ -19,7 +21,7 @@ async function getIcon(iconURL) {
 }
 
 async function writeHeroDataToFile(hero, heroDir) {
-
+    console.log(`generateHeroData::writeHeroDataToFile - hero: ${hero} heroDir: ${heroDir}`);
     fs.writeFile(`${heroDir}/${hero.name}.json`, JSON.stringify(hero));
 
     writeHeroPortraitToFile(hero, heroDir);
@@ -27,12 +29,14 @@ async function writeHeroDataToFile(hero, heroDir) {
 }
 
 async function writeHeroPortraitToFile(hero, heroDir) {
+    console.log(`generateHeroData::writeHeroPortraitToFile - hero: ${hero} heroDir: ${heroDir}`);
     const iconURL = Object.values(hero.icon_url)[0]; // assumes icon_url has a one prop which is the URL
 
     writeIconToFile(hero, `${heroDir}/${hero.name}.png`, iconURL);
 }
 
 async function writeHeroTalentIconsToFile(hero, heroDir) {
+    console.log(`generateHeroData::writeHeroTalentIconsToFile - hero: ${hero} heroDir: ${heroDir}`);    
     const { talents } = hero;
     const heroTalentsDir = `${heroDir}/talents`;
 
@@ -47,6 +51,7 @@ async function writeHeroTalentIconsToFile(hero, heroDir) {
 }
 
 async function writeIconToFile(hero, filePath, iconURL) {
+    console.log(`generateHeroData::writeIconToFile - hero: ${hero} filePath: ${filePath} iconURL: ${iconURL}`);
     const icon = await getIcon(iconURL)
         .catch(() => {
             console.log(`Failed to get icon for hero: ${hero.name}`);
@@ -59,6 +64,10 @@ async function writeIconToFile(hero, filePath, iconURL) {
 }
 
 async function generateHeroData() {
+    if (!fs.existsSync(generatedDir)) {
+        fs.mkdirSync(generatedDir);
+    }
+
     if (!fs.existsSync(heroDataDir)) {
         fs.mkdirSync(heroDataDir);
     }
@@ -67,15 +76,15 @@ async function generateHeroData() {
     console.log(heroes.length);
     heroes.forEach( async (hero) => {
         heroList = [...heroList, hero.name];
-        // const heroDir = `${heroDataDir}/${hero.name.replace(/\./gi,'')}`; // remove . from names like E.T.C.
-        // if (!fs.existsSync(heroDir)) {
-        //     fs.mkdirSync(heroDir);
-        // }
-        //
-        // writeHeroDataToFile(hero, heroDir);
+        const heroDir = `${heroDataDir}/${hero.name.replace(/\./gi,'')}`; // remove . from names like E.T.C.
+        if (!fs.existsSync(heroDir)) {
+            fs.mkdirSync(heroDir);
+        }
+        
+        writeHeroDataToFile(hero, heroDir);
     });
 
     fs.writeFile(`${heroDataDir}/heroes.json`, JSON.stringify(heroList));
 }
 
-generateHeroData();
+module.exports = generateHeroData;

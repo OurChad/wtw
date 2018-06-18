@@ -1,3 +1,3 @@
-import HotsAPI from './HotSAPI';
+const hotsAPI = require('./HotSAPI');
 
-export default HotsAPI;
+module.exports = hotsAPI;
