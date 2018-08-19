@@ -1,5 +1,4 @@
 const fs = require('fs');
-const _ = require('lodash');
 const axios = require('axios');
 const hotsAPI = require('../api');
 
@@ -7,13 +6,13 @@ const generatedDir = `${__dirname}/../generated`;
 const heroDataDir = `${generatedDir}/heroData`;
 let heroList = [];
 
-async function getHeroes() {
-    console.log(`generateHeroData::getHeroes`);
-    return await hotsAPI.getHeroes();
+function getHeroes() {
+    console.log('generateHeroData::getHeroes');
+    return hotsAPI.getHeroes();
 }
 
-async function getIcon(iconURL) {
-    return await axios({
+function getIcon(iconURL) {
+    return axios({
         method: 'GET',
         url: iconURL,
         responseType: 'stream'
@@ -74,9 +73,9 @@ async function generateHeroData() {
 
     const heroes = await getHeroes();
     console.log(heroes.length);
-    heroes.forEach( async (hero) => {
+    heroes.forEach(async (hero) => {
         heroList = [...heroList, hero.name];
-        const heroDir = `${heroDataDir}/${hero.name.replace(/\./gi,'')}`; // remove . from names like E.T.C.
+        const heroDir = `${heroDataDir}/${hero.name.replace(/\./gi, '')}`; // remove . from names like E.T.C.
         if (!fs.existsSync(heroDir)) {
             fs.mkdirSync(heroDir);
         }
