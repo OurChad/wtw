@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import './HeroPortrait.css';
 import defaultPortrait from '../../resources/images/hots-default-portrait.png';
 
 export default class HeroPortrait extends Component {
@@ -24,8 +26,7 @@ export default class HeroPortrait extends Component {
               <div>
                   {img}
                   <div>{hero.name}</div>
-              </div>
-                
+              </div>                
           );
       }
 
@@ -36,8 +37,10 @@ export default class HeroPortrait extends Component {
       const { hero} = this.props;
 
       return (
-          <div>
-              {this.getHeroImg(hero)}
+          <div className="HeroPortrait">
+              <Link to={`/hero/${hero.name}`} hero={hero} >
+                  {this.getHeroImg(hero)}
+              </Link>
           </div>
       );
   }

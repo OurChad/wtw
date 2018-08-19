@@ -1,0 +1,11 @@
+.HeroPortrait img {    
+    border: solid 2px var(--secondary-theme-color);
+    border-radius: 48px;
+    box-shadow: 4px 4px 4px black;
+}
+
+.HeroPortrait a {    
+    color: var(--secondary-theme-color);
+    text-shadow: none;
+    text-decoration: none;
+}

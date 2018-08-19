@@ -1,23 +1,28 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import HeroPortrait from '../HeroPortrait';
 import { withAppContext } from '../../context/withAppContext';
+import { withStyles } from '@material-ui/core/styles';
 
+const styles = {
+    heroList: {
+        marginTop: '20px',
+        display: 'flex',
+        justifyContent: 'center'
+    }
+};
 class HeroList extends Component {
 
     render() {
-        
+        const { classes } = this.props;
         return (
             <React.Fragment>
                 <Grid container>
                     {
                         this.props.appContext.heroes.map(hero => {
                             return (
-                                <Grid item xs={4} sm={1} key={hero.name}>
-                                    <Link to={`/hero/${hero.name}`} hero={hero} >
-                                        <HeroPortrait hero={hero} />
-                                    </Link>
+                                <Grid item xs={4} sm={3} md={1} key={hero.name} className={classes.heroList}>                                    
+                                    <HeroPortrait hero={hero} />
                                 </Grid>
                             );
                         })
@@ -28,4 +33,4 @@ class HeroList extends Component {
     }
 }
 
-export default withAppContext(HeroList);
+export default withStyles(styles)(withAppContext(HeroList));

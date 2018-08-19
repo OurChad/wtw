@@ -1,6 +1,15 @@
 import React, { Component } from 'react';
+import { withStyles } from '@material-ui/core/styles';
 import HeroPortrait from '../HeroPortrait';
 import { withAppContext } from '../../context/withAppContext';
+import HeroTalentsList from '../HeroTalentsList/HeroTalentsList';
+
+const styles = {
+    heroPortrait: {
+        marginTop: '20px',
+        marginBottom: '20px',
+    }
+};
 
 class HeroDetails extends Component {
 
@@ -15,12 +24,17 @@ class HeroDetails extends Component {
     }
 
     render() {
+        const { classes } = this.props;
+        const { hero } = this.state;
         return (
             <div>
-                <HeroPortrait hero={this.state.hero} />
+                <div className={classes.heroPortrait}>
+                    <HeroPortrait hero={hero} />
+                </div>
+                <HeroTalentsList talents={hero.talents} />
             </div>
         );
     }
 }
 
-export default withAppContext(HeroDetails);
+export default withStyles(styles)(withAppContext(HeroDetails));

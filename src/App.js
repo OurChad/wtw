@@ -23,12 +23,14 @@ class App extends Component {
         return (
             <AppContext.Provider value={this.state}>
                 <Router>
-                    <div>  
+                    <div className="App">  
                         <AppBar />
-                        <Route exact path='/' component={HeroList} />
-                        <Route path='/player/:player' component={PlayerDetails} />
-                        <Route path='/player/:player/hero/:heroName' component={HeroDetails} />
-                        <Route path='/hero/:heroName' component={HeroDetails} />
+                        <div className="AppContainer">
+                            <Route exact path='/' component={HeroList} />
+                            <Route path='/player/:player' component={PlayerDetails} />
+                            <Route path='/player/:player/hero/:heroName' component={HeroDetails} />
+                            <Route path='/hero/:heroName' component={HeroDetails} />
+                        </div>
                     </div>
                 </Router>
             </AppContext.Provider>

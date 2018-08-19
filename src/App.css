@@ -1,28 +1,23 @@
+:root {
+  --primary-theme-color: #524763;
+  --secondary-theme-color: #82D8D8;
+  --primary-dark-color: #333;
+}
+
 .App {
-  text-align: center;
+  background-color: var(--primary-dark-color);
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+.AppContainer {  
+  width: 80%;
+  margin-left: 10%;
+  margin-right: 10%;
 }
 
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
-  color: white;
-}
-
-.App-title {
-  font-size: 1.5em;
-}
-
-.App-intro {
-  font-size: large;
-}
-
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+@media screen and (max-width: 768px) {
+  .AppContainer {  
+    width: 90%;
+    margin-left: 5%;
+    margin-right: 5%;
+  }
 }
