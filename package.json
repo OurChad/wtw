@@ -21,6 +21,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
+    "build-prod": "npm run install && npm run set-up && npm run build",
     "generate-data": "node ./src/build/build.js",
     "remove-hero-resources": "rm -rf heroes-talents && rm -rf src/resources/hero && rm -rf src/resources/images/heroes && rm -rf src/resources/images/talents",
     "set-up": "npm run remove-hero-resources && git clone https://github.com/heroespatchnotes/heroes-talents.git && mv heroes-talents/hero src/resources && mv heroes-talents/images/* src/resources/images && rm -rf heroes-talents && npm run generate-data"
