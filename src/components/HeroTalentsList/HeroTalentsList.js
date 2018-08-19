@@ -66,7 +66,7 @@ class HeroTalentsList extends Component {
                                             <TableCell>
                                                 {icon}
                                             </TableCell>
-                                            <Tooltip title={talent.description} enterTouchDelay={0} leaveTouchDelay={3000}>
+                                            <Tooltip title={talent.description} leaveTouchDelay={3000}>
                                                 <TableCell component="th" scope="row">
                                                     {talent.name}
                                                 </TableCell>
