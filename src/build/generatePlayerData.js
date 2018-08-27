@@ -12,17 +12,46 @@ const players = {
     // "wevansly#2471",
     // "Okopolitan#2314",
     // "ufu#2259",
-    "Chaxtreme": 7349829,
-    "EaMo": 2560109,
-    "havocx42": 7325363,
-    "wevansly": 2875722,
-    "Okopolitan": 102373,
-    "ufu": 6750654
+    'Chaxtreme': 7349829,
+    'EaMo': 2560109,
+    'havocx42': 7325363,
+    'wevansly': 2875722,
+    'Okopolitan': 102373,
+    'ufu': 6750654
 };
 
 async function getReplays(params) {
-    console.log(`generatePlayerData::getReplays`);
+    console.log('generatePlayerData::getReplays');
     return await hotsAPI.getReplays({ params });
+}
+
+async function getReplaysPaged(params) {
+    console.log('generatePlayerData::getReplaysPaged');
+    let allReplays = [];
+    let page = 1;
+    params = Object.assign({}, params, { page });
+    const replay = await hotsAPI.getReplaysPaged({ params });
+    allReplays = allReplays.concat(replay.replays);
+
+    if (replay.page_count > page) {
+        allReplays = getReplaysByPage(page++, replay.page_count, params);
+    }
+
+    return allReplays;
+}
+
+async function getReplaysByPage(page, pageCount, params) {
+    console.log('generatePlayerData::getReplaysByPage');
+    let allReplays = [];
+    params = Object.assign({}, params, { page });
+    const replay = await hotsAPI.getReplaysPaged({ params });
+    allReplays = allReplays.concat(replay.replays);
+
+    if (pageCount > page) {
+        getReplaysByPage(page++, pageCount, params);
+    }
+
+    return allReplays;
 }
 
 function writeToPlayerFile(dirName, fileName, data) {
@@ -43,32 +72,52 @@ function writeToPlayerFile(dirName, fileName, data) {
 
 function groupByGameType(replays) {
     return _(replays)
-            .orderBy('game_date')
-            .groupBy('game_type')
-            .value()
+        .orderBy('game_date')
+        .groupBy('game_type')
+        .value();
 }
 
 function groupByHero(replays, blizzID) {
-    return _(replays)
-            .orderBy('game_date')
-            .groupBy((replay) => {
-                const playerInstance = _.find(replay.players, (matchPlayer) => {
-                    return matchPlayer.blizz_id === blizzID;
-                });
+    const heroData = _(replays)
+        .orderBy('game_date')
+        .groupBy((replay) => {
+            const playerInstance = _.find(replay.players, (matchPlayer) => {
+                return matchPlayer.blizz_id === blizzID;
+            });
+            const hero = playerInstance.hero;
+            // getReplaysPaged retunrs hero as an object
+            return typeof hero === 'string' ? hero : hero.name;
+        })
+        .value();
 
-                return playerInstance.hero;
-            })
-            .value()
+    const heroNames = Object.keys(heroData);
+    heroNames.forEach(heroName => {
+        const heroGameData = heroData[heroName];
+
+        // Check each game with hero and mark if player won
+        heroGameData.forEach(gameData => {
+            gameData.isWinner = false;
+            
+            if (_.find(gameData.players, player => player.hero === heroName && player.winner)) {
+                gameData.isWinner = true;
+            }
+            const playerBlizzIDs = Object.values(players);
+            gameData.teamPlayers = gameData.players.filter(player => playerBlizzIDs.includes(player.blizz_id))
+                .map(player => player);
+        });
+    });
+    
+    return heroData;
 }
 
 function generatePlayerData() {
-    console.log(`generatePlayerData::generatePlayerData`);
+    console.log('generatePlayerData::generatePlayerData');
     if (!fs.existsSync(generatedDir)) {
         fs.mkdirSync(generatedDir);
     }
 
     Object.entries(players).forEach(async ([player, blizzID]) => {
-        const replays = await getReplays({
+        const replays = await getReplaysPaged({
             start_date: '2017-11-01',
             end_date: '2018-11-01',
             player,
@@ -76,7 +125,7 @@ function generatePlayerData() {
         });
 
         const filterdReplays = replays.filter((replay) => {
-            return replay.players.some((matchPlayer) => matchPlayer.blizz_id === blizzID)
+            return replay.players.some((matchPlayer) => matchPlayer.blizz_id === blizzID);
         });
 
         writeToPlayerFile('gameType', player, JSON.stringify(groupByGameType(filterdReplays)));
