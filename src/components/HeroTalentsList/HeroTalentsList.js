@@ -31,7 +31,7 @@ const styles = theme => ({
         },
     },
     hideOnDesktop: {
-        [theme.breakpoints.between('md', 'lg')]: {
+        [theme.breakpoints.between('md', 'xl')]: {
             display: 'none',
         },
     },
@@ -192,7 +192,7 @@ class HeroTalentsList extends Component {
                             {this.renderTalents()}
                         </TableBody>
                     </Table>
-                    {this.renderTalentsExpansionPanels(true)}                    
+                    <div className={classes.hideOnDesktop}>{this.renderTalentsExpansionPanels(true)}</div>                    
                 </div>
             </Paper>
         );

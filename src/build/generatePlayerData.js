@@ -12,13 +12,15 @@ const players = {
     // "wevansly#2471",
     // "Okopolitan#2314",
     // "ufu#2259",
-    'Chaxtreme': 7349829,
-    'EaMo': 2560109,
-    'havocx42': 7325363,
-    'wevansly': 2875722,
-    'Okopolitan': 102373,
-    'ufu': 6750654
+    7349829: 'Chaxtreme',
+    2560109: 'EaMo',
+    7325363: 'havocx42',
+    2875722: 'wevansly',
+    102373: 'Okopolitan',
+    6750654: 'ufu'
 };
+
+const teamComps = new Map();
 
 async function getReplays(params) {
     console.log('generatePlayerData::getReplays');
@@ -78,7 +80,7 @@ function groupByGameType(replays) {
 }
 
 function groupByHero(replays, blizzID) {
-    const heroData = _(replays)
+    const heroReplayData = _(replays)
         .orderBy('game_date')
         .groupBy((replay) => {
             const playerInstance = _.find(replay.players, (matchPlayer) => {
@@ -90,24 +92,113 @@ function groupByHero(replays, blizzID) {
         })
         .value();
 
-    const heroNames = Object.keys(heroData);
+    const heroNames = Object.keys(heroReplayData);
+    const heroData = {};
     heroNames.forEach(heroName => {
-        const heroGameData = heroData[heroName];
+        heroData[heroName] = {};
 
+        const heroGameData = heroReplayData[heroName];
+        let winCount = 0;
         // Check each game with hero and mark if player won
-        heroGameData.forEach(gameData => {
-            gameData.isWinner = false;
-            
-            if (_.find(gameData.players, player => player.hero === heroName && player.winner)) {
-                gameData.isWinner = true;
+        heroGameData.forEach(gameData => {            
+            if (_.find(gameData.players, player => player.blizz_id === blizzID && player.winner)) {
+                winCount++;
             }
-            const playerBlizzIDs = Object.values(players);
-            gameData.teamPlayers = gameData.players.filter(player => playerBlizzIDs.includes(player.blizz_id))
-                .map(player => player);
         });
+
+        heroData[heroName].numberOfGames = heroGameData.length;
+        heroData[heroName].winPercentage = Number.parseFloat((winCount / heroGameData.length) * 100).toFixed(2);
     });
     
     return heroData;
+}
+
+function groupByTeamComp(replays, blizzID) {
+    const teamReplayData = _(replays)
+        .orderBy('game_date')
+        .filter(replay => replay.game_type !== 'Brawl')
+        .groupBy((replay) => {
+            const playerInstance = _.find(replay.players, (matchPlayer) => {
+                return matchPlayer.blizz_id === blizzID;
+            });
+            const isWinner = playerInstance.winner;
+            // getReplaysPaged retunrs hero as an object
+            return isWinner ? 'Win' : 'Loss';
+        })
+        .value();
+
+    const gameOutcome = Object.keys(teamReplayData);
+    gameOutcome.forEach(outcome => {
+        const teamGameData = teamReplayData[outcome];
+
+        teamGameData.forEach(gameData => {
+            const playerBlizzIDs = Object.keys(players);
+            const teamPlayers = gameData.players.filter(player => playerBlizzIDs.includes(`${player.blizz_id}`));
+
+            if (teamPlayers.length > 1) {                
+                addCompositionToTeamCompMap(gameData, teamPlayers, outcome === 'Win');
+            }
+        });
+    });
+    
+    return teamComps;
+}
+
+function addCompositionToTeamCompMap(gameData, teamPlayers, isWin) {
+    const compMapKey = teamPlayers.map(player => player.hero.name)
+        .sort(sortHeroNames) // Sort hero names so key is always the same
+        .reduce((keyAcc, name) => {
+            keyAcc += name;
+            return keyAcc;
+        }, '');
+
+    const teamPlayersData = teamPlayers.reduce((playersAcc, player) => {
+        playersAcc.push({
+            hero: player.hero.name,
+            blizzID: player.blizz_id,
+            playerName: players[`${player.blizz_id}`]
+        });
+
+        return playersAcc;
+    }, []);
+
+    const winningTeamComp = gameData.players.filter(player => player.winner).map(player => player.hero.name);
+    const losingTeamComp = gameData.players.filter(player => !player.winner).map(player => player.hero.name);
+
+    const compData = {
+        gameID: gameData.id,
+        gameType: gameData.game_type,
+        mapName: gameData.game_map,
+        isWin,
+        teamPlayers: teamPlayersData,
+        winningTeamComp,
+        losingTeamComp
+    };
+
+    const existingCompData = teamComps.get(compMapKey);
+
+    // If a comp entry already exists in the map but not for an existing game, add it to the entry
+    if (existingCompData) {
+        if (!_.find(existingCompData, (comp) => comp.gameID === gameData.id)) {
+            teamComps.set(compMapKey, existingCompData.concat(compData));        
+        }
+    } else {
+        teamComps.set(compMapKey, [compData]);
+    }
+}
+
+function sortHeroNames(hero1, hero2) {
+    const nameA = hero1.toUpperCase(); // ignore upper and lowercase
+    const nameB = hero2.toUpperCase(); // ignore upper and lowercase
+    if (nameA < nameB) {
+        return -1;
+    }
+    if (nameA > nameB) {
+        return 1;
+    }
+
+    // names must be equal
+    return 0;
 }
 
 function generatePlayerData() {
@@ -116,7 +207,10 @@ function generatePlayerData() {
         fs.mkdirSync(generatedDir);
     }
 
-    Object.entries(players).forEach(async ([player, blizzID]) => {
+    const numberOfPlayers = Object.keys(players).length;
+    let entryCount = 1;
+    Object.entries(players).forEach(async ([blizzID, player]) => {
+        blizzID = Number.parseInt(blizzID);
         const replays = await getReplaysPaged({
             start_date: '2017-11-01',
             end_date: '2018-11-01',
@@ -128,9 +222,17 @@ function generatePlayerData() {
             return replay.players.some((matchPlayer) => matchPlayer.blizz_id === blizzID);
         });
 
-        writeToPlayerFile('gameType', player, JSON.stringify(groupByGameType(filterdReplays)));
+        // writeToPlayerFile('gameType', player, JSON.stringify(groupByGameType(filterdReplays)));
         writeToPlayerFile('hero', player, JSON.stringify(groupByHero(filterdReplays, blizzID)));
+        groupByTeamComp(filterdReplays, blizzID);
+
+        if (entryCount === numberOfPlayers) {
+            writeToPlayerFile('team', 'team_comps', JSON.stringify([...teamComps]));
+        }
+
+        entryCount++;
     });
+
 }
 
 module.exports = generatePlayerData;
