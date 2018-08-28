@@ -6,7 +6,6 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import { Tooltip } from '@material-ui/core';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
@@ -113,11 +112,9 @@ class HeroTalentsList extends Component {
                                             <TableCell>
                                                 {icon}
                                             </TableCell>
-                                            <Tooltip title={talent.description} leaveTouchDelay={3000}>
-                                                <TableCell component="th" scope="row">
-                                                    {talent.name}
-                                                </TableCell>
-                                            </Tooltip>
+                                            <TableCell component="th" scope="row">
+                                                {talent.name}
+                                            </TableCell>
                                             <TableCell>{talent.description}</TableCell>
                                         </TableRow>
                                     );
@@ -125,50 +122,6 @@ class HeroTalentsList extends Component {
                             }
                         </React.Fragment>    
                     </React.Fragment>                    
-                        
-                );
-            })
-        );
-    }
-    renderTalentsExpansionPanels = () => {
-        const { classes, talents } = this.props;
-        const { expanded } = this.state;
-        const talentLevels = Object.keys(talents);
-        
-        return (
-            talentLevels.map(level => {
-                return (
-                    <div key={level} className={classes.hideOnDesktop}>                        
-                        <Typography className={classes.levelRow}>
-                                Level {level}
-                        </Typography>
-                        <React.Fragment>
-                            {
-                                talents[level].map(talent => {
-                                    let iconSrc = '';
-                                    try {
-                                        iconSrc = require(`../../resources/images/talents/${talent.icon}`);
-                                    } catch (ex) {
-                                        console.error(ex);
-                                    }
-                                    const icon = <img className={classes.talentIcon} src={iconSrc} alt={talent.abilityId} key={talent.tooltipId} />;
-                                    return (
-                                        <ExpansionPanel key={talent.tooltipId} expanded={expanded === talent.tooltipId} onChange={this.handleChange(talent.tooltipId)}>
-                                            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                                                {icon}
-                                                <Typography className={classes.secondaryHeading}>{talent.name}</Typography>
-                                            </ExpansionPanelSummary>
-                                            <ExpansionPanelDetails>
-                                                <Typography>
-                                                    {talent.description}
-                                                </Typography>
-                                            </ExpansionPanelDetails>
-                                        </ExpansionPanel>
-                                    );
-                                })
-                            }
-                        </React.Fragment>    
-                    </div>                    
                         
                 );
             })
@@ -192,7 +145,7 @@ class HeroTalentsList extends Component {
                             {this.renderTalents()}
                         </TableBody>
                     </Table>
-                    <div className={classes.hideOnDesktop}>{this.renderTalentsExpansionPanels(true)}</div>                    
+                    <div className={classes.hideOnDesktop}>{this.renderTalents(true)}</div>                    
                 </div>
             </Paper>
         );
