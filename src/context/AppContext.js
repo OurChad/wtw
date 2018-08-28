@@ -18,7 +18,7 @@ export const initAppContext = function () {
         const splitPath = playerDataPath.split('/');
         const playerName = splitPath[splitPath.length - 1].split('.json')[0];
 
-        if (playersAcc.includes(playerName)) {
+        if (playersAcc.includes(playerName) || playerName.includes('_')) {
             return playersAcc;
         }
             

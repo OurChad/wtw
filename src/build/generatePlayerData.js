@@ -6,18 +6,14 @@ const generatedDir = `${__dirname}/../generated`;
 
 
 const players = {
-    // "Chaxtreme#2576",
-    // "EaMo#2553",
-    // "havocx42#2824",
-    // "wevansly#2471",
-    // "Okopolitan#2314",
-    // "ufu#2259",
     7349829: 'Chaxtreme',
     2560109: 'EaMo',
     7325363: 'havocx42',
     2875722: 'wevansly',
     102373: 'Okopolitan',
-    6750654: 'ufu'
+    6750654: 'ufu',
+    2894009: 'Lovare',
+    691334: 'Mariodroepie',
 };
 
 const teamComps = new Map();
@@ -87,8 +83,8 @@ function groupByHero(replays, blizzID) {
                 return matchPlayer.blizz_id === blizzID;
             });
             const hero = playerInstance.hero;
-            // getReplaysPaged retunrs hero as an object
-            return typeof hero === 'string' ? hero : hero.name;
+            // getReplaysPaged returns hero as an object
+            return typeof hero === 'string' ? hero : hero.attribute_id;
         })
         .value();
 
@@ -103,6 +99,11 @@ function groupByHero(replays, blizzID) {
         heroGameData.forEach(gameData => {            
             if (_.find(gameData.players, player => player.blizz_id === blizzID && player.winner)) {
                 winCount++;
+            }
+
+            const playerHero = _.find(gameData.players, player => player.hero.attribute_id && player.hero.attribute_id === heroName);
+            if (playerHero) {
+                heroData[heroName].hero = playerHero.name; 
             }
         });
 
@@ -212,8 +213,8 @@ function generatePlayerData() {
     Object.entries(players).forEach(async ([blizzID, player]) => {
         blizzID = Number.parseInt(blizzID);
         const replays = await getReplaysPaged({
-            start_date: '2017-11-01',
-            end_date: '2018-11-01',
+            start_date: '2017-06-01',
+            end_date: '2018-12-31',
             player,
             with_players: true
         });

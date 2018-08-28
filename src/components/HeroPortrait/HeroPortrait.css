@@ -8,4 +8,5 @@
     color: var(--secondary-theme-color);
     text-shadow: none;
     text-decoration: none;
+    text-align: center;
 }

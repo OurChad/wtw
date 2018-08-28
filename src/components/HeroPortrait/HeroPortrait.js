@@ -1,17 +1,36 @@
 import React, { Component } from 'react';
 import { Link } from '@reach/router';
 import PropTypes from 'prop-types';
-import './HeroPortrait.css';
+import { withStyles } from '@material-ui/core/styles';
 import defaultPortrait from '../../resources/images/hots-default-portrait.png';
 
-export default class HeroPortrait extends Component {
+const styles = {
+    heroPortrait: {
+        textAlign: 'center',
+        '& a': {
+            textShadow: 'none',
+            textDecoration: 'none',
+        }
+    },
+    heroName: {
+        color: 'var(--secondary-theme-color)',
+    },
+    heroImg: {
+        border: 'solid 2px var(--secondary-theme-color)',
+        borderRadius: '48px',
+        boxShadow: '4px 4px 4px black',
+    }
+};
+
+class HeroPortrait extends Component {
   static propTypes = {
       hero: PropTypes.object.isRequired,
-      hideName: PropTypes.bool
+      withLink: PropTypes.bool,
+      hideName: PropTypes.bool,
   }
 
   getHeroImg = (hero) => {     
-      const { hideName } = this.props;
+      const { classes, hideName } = this.props;
       let imgSrc = defaultPortrait;    
 
       try {
@@ -20,12 +39,12 @@ export default class HeroPortrait extends Component {
           console.error(ex);
       }
 
-      const img = <img src={imgSrc} alt={hero.name} key={hero.name} />;
+      const img = <img className={classes.heroImg} src={imgSrc} alt={hero.name} key={hero.name} />;
       if (!hideName) {
           return (
               <div>
                   {img}
-                  <div>{hero.name}</div>
+                  <div className={classes.heroName}>{hero.name}</div>
               </div>                
           );
       }
@@ -34,14 +53,25 @@ export default class HeroPortrait extends Component {
   };
 
   render() {
-      const { hero} = this.props;
+      const { classes, hero, withLink } = this.props;
+
+      if (withLink) {
+          return (
+              <div className={classes.heroPortrait}>
+                  <Link to={`hero/${hero.name}`}>
+                      {this.getHeroImg(hero)}
+                  </Link>
+              </div>
+          );
+      }
 
       return (
-          <div className="HeroPortrait">
-              <Link to={`/hero/${hero.name}`} hero={hero} >
-                  {this.getHeroImg(hero)}
-              </Link>
+          <div className={classes.heroPortrait}>
+              {this.getHeroImg(hero)}
           </div>
       );
+
   }
 }
+
+export default withStyles(styles)(HeroPortrait);

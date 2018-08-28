@@ -22,7 +22,7 @@ class HeroList extends Component {
                         this.props.appContext.heroes.map(hero => {
                             return (
                                 <Grid item xs={4} sm={3} md={2} key={hero.name} className={classes.heroList}>                                    
-                                    <HeroPortrait hero={hero} />
+                                    <HeroPortrait hero={hero} withLink/>
                                 </Grid>
                             );
                         })

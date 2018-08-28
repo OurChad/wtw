@@ -18,9 +18,9 @@ class App extends Component {
 
     render() {
         return (
-            <AppContext.Provider value={this.state}>
-                <div className="App">  
-                    <AppBar />
+            <div className="App">  
+                <AppBar players={this.state.players} />
+                <AppContext.Provider value={this.state}>
                     <div className="AppContainer">
                         <Router>
                             <HeroList exact path='/' component={HeroList} />
@@ -29,8 +29,8 @@ class App extends Component {
                             <HeroDetails path='/hero/:heroName' component={HeroDetails} />
                         </Router>
                     </div>
-                </div>
-            </AppContext.Provider>
+                </AppContext.Provider>
+            </div>
         );
     }
 }
