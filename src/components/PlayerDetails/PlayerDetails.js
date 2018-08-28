@@ -6,9 +6,9 @@ class PlayerDetails extends Component {
     constructor(props) {
         super(props);
 
-        const { match: { params }, appContext } = this.props;
-        const gameData = appContext.playerGameData[params.player];
-        const heroData = appContext.playerHeroData[params.player];
+        const { player, appContext } = this.props;
+        const gameData = appContext.playerGameData[player];
+        const heroData = appContext.playerHeroData[player];
 
         this.state = {
             gameData,

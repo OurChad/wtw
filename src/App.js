@@ -1,8 +1,5 @@
 import React, { Component } from 'react';
-import {
-    BrowserRouter as Router,
-    Route
-} from 'react-router-dom';
+import { Router } from '@reach/router';
 import './App.css';
 import { withStyles } from '@material-ui/core/styles';
 import AppBar from './components/AppBar';
@@ -22,17 +19,17 @@ class App extends Component {
     render() {
         return (
             <AppContext.Provider value={this.state}>
-                <Router>
-                    <div className="App">  
-                        <AppBar />
-                        <div className="AppContainer">
-                            <Route exact path='/' component={HeroList} />
-                            <Route path='/player/:player' component={PlayerDetails} />
-                            <Route path='/player/:player/hero/:heroName' component={HeroDetails} />
-                            <Route path='/hero/:heroName' component={HeroDetails} />
-                        </div>
+                <div className="App">  
+                    <AppBar />
+                    <div className="AppContainer">
+                        <Router>
+                            <HeroList exact path='/' component={HeroList} />
+                            <PlayerDetails path='/player/:player' component={PlayerDetails} />
+                            <HeroDetails path='/player/:player/hero/:heroName' component={HeroDetails} />
+                            <HeroDetails path='/hero/:heroName' component={HeroDetails} />
+                        </Router>
                     </div>
-                </Router>
+                </div>
             </AppContext.Provider>
         );
     }

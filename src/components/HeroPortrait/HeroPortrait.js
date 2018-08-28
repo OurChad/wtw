@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from '@reach/router';
 import PropTypes from 'prop-types';
 import './HeroPortrait.css';
 import defaultPortrait from '../../resources/images/hots-default-portrait.png';

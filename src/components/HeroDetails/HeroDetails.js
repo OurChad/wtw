@@ -15,8 +15,8 @@ class HeroDetails extends Component {
 
     constructor(props) {
         super(props);
-        const { match: {params}, appContext: { heroes } } = this.props;        
-        const hero = heroes.find(aHero => aHero.name === params.heroName);
+        const { heroName, appContext: { heroes } } = this.props;        
+        const hero = heroes.find(aHero => aHero.name === heroName);
 
         this.state = {
             hero
