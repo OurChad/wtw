@@ -23,30 +23,29 @@ async function getReplays(params) {
     return await hotsAPI.getReplays({ params });
 }
 
-async function getReplaysPaged(params) {
-    console.log('generatePlayerData::getReplaysPaged');
-    let allReplays = [];
-    let page = 1;
-    params = Object.assign({}, params, { page });
-    const replay = await hotsAPI.getReplaysPaged({ params });
-    allReplays = allReplays.concat(replay.replays);
-
-    if (replay.page_count > page) {
-        allReplays = getReplaysByPage(page++, replay.page_count, params);
-    }
-
-    return allReplays;
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function getReplaysByPage(page, pageCount, params) {
-    console.log('generatePlayerData::getReplaysByPage');
+async function getReplaysPaged(params, page = 1) {
+    console.log(`generatePlayerData::getReplaysPaged - player: ${params.player} - page: ${page}`);
     let allReplays = [];
-    params = Object.assign({}, params, { page });
-    const replay = await hotsAPI.getReplaysPaged({ params });
-    allReplays = allReplays.concat(replay.replays);
-
-    if (pageCount > page) {
-        getReplaysByPage(page++, pageCount, params);
+    try {
+        params = Object.assign({}, params, { page });
+        const replay = await hotsAPI.getReplaysPaged({ params });
+        allReplays = allReplays.concat(replay.replays);
+    
+        if (replay.replays.length === replay.per_page) {
+            const nextReplays = await getReplaysPaged(params, ++page); // getReplaysByPage(++page, replay.page_count, params);
+            allReplays = allReplays.concat(nextReplays);
+        }
+    } catch (error) {
+        if (error.response.status === 429) {
+            console.log('Too many requests made to HotSAPI. Timing out for 30 seconds.');
+            await sleep(30000);
+            const nextReplays = await getReplaysPaged(params, ++page);
+            allReplays = allReplays.concat(nextReplays);
+        }
     }
 
     return allReplays;
@@ -70,6 +69,7 @@ function writeToPlayerFile(dirName, fileName, data) {
 
 function groupByGameType(replays) {
     return _(replays)
+        .filter(replay => replay.game_type !== 'Brawl')
         .orderBy('game_date')
         .groupBy('game_type')
         .value();
@@ -77,6 +77,7 @@ function groupByGameType(replays) {
 
 function groupByHero(replays, blizzID) {
     const heroReplayData = _(replays)
+        .filter(replay => replay.game_type !== 'Brawl')
         .orderBy('game_date')
         .groupBy((replay) => {
             const playerInstance = _.find(replay.players, (matchPlayer) => {
@@ -213,7 +214,7 @@ function generatePlayerData() {
     Object.entries(players).forEach(async ([blizzID, player]) => {
         blizzID = Number.parseInt(blizzID);
         const replays = await getReplaysPaged({
-            start_date: '2017-06-01',
+            start_date: '2017-01-01',
             end_date: '2018-12-31',
             player,
             with_players: true
