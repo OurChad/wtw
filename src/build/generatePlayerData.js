@@ -226,10 +226,26 @@ function generatePlayerData() {
 
         // writeToPlayerFile('gameType', player, JSON.stringify(groupByGameType(filterdReplays)));
         writeToPlayerFile('hero', player, JSON.stringify(groupByHero(filterdReplays, blizzID)));
-        groupByTeamComp(filterdReplays, blizzID);
+        await groupByTeamComp(filterdReplays, blizzID);
 
         if (entryCount === numberOfPlayers) {
-            writeToPlayerFile('team', 'team_comps', JSON.stringify([...teamComps]));
+            const teamCompEntries = teamComps.entries();
+            const filteredTeamComps = new Map();
+            let nextComp = teamCompEntries.next();
+            try {
+                while (!nextComp.done) {
+                    const comps = nextComp.value;
+                    if (comps && comps[1].length >= 2) {
+                        filteredTeamComps.set(comps[0], comps[1]);
+                    }
+
+                    nextComp = teamCompEntries.next();
+                }
+            } catch (err) {
+                console.log(err);
+            } finally {
+                writeToPlayerFile('team', 'team_comps', JSON.stringify([...filteredTeamComps]));
+            }
         }
 
         entryCount++;

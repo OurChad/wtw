@@ -27,12 +27,23 @@ export const initAppContext = function () {
         
     const playerGameData = getPlayersData(playerReqContext, players, 'gameType');
     const playerHeroData = getPlayersData(playerReqContext, players, 'hero');
+    const teamComps = playerReqContext.keys()
+        .filter(fileKey => fileKey.includes('team_comp'))
+        .reduce((teamCompMap, playerDataPath) => {
+            // Result is in the shape of [[[]]]
+            const teamCompArray = playerReqContext(playerDataPath);
+            teamCompArray.forEach(comp => {
+                teamCompMap.set(comp[0], comp[1]);
+            });
+            return teamCompMap;
+        }, new Map());
 
     return {
         heroes,
         players,
         playerGameData,
-        playerHeroData
+        playerHeroData,
+        teamComps
     };
 };
 
