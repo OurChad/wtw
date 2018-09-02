@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import { Router } from '@reach/router';
 import './App.css';
-import { withStyles } from '@material-ui/core/styles';
 import { AppContext, initAppContext } from './context/AppContext';
 import AppBar from './components/AppBar';
 import HeroList from './components/HeroList';
 import HeroDetails from './components/HeroDetails';
 import PlayerDetails from './components/PlayerDetails/PlayerDetails';
-import TeamComp from './components/TeamComp';
+import TeamCompDetails from './components/TeamCompDetails/TeamCompDetails';
 
 class App extends Component {
 
@@ -28,11 +27,8 @@ class App extends Component {
                             <PlayerDetails path='/player/:player' />
                             <HeroDetails path='/player/:player/hero/:heroName' />
                             <HeroDetails path='/hero/:heroName' />
+                            <TeamCompDetails path='/teamcomps' />
                         </Router>
-                        <TeamComp 
-                            teamComp={this.state.teamComps.get('Kael\'thasSonya')[0].winningTeamComp} 
-                            teamPlayers={this.state.teamComps.get('Kael\'thasSonya')[0].teamPlayers}
-                        />
                     </div>
                 </AppContext.Provider>
             </div>

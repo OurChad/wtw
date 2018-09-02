@@ -2,17 +2,16 @@ import React, { Component } from 'react';
 import { withAppContext } from '../../context/withAppContext';
 import { withStyles } from '@material-ui/core/styles';
 import HeroPortrait from '../HeroPortrait';
-import Grid from '@material-ui/core/Grid';
 
 const styles = {
     teamCompContainer: {
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center',
-        flexWrap: 'wrap'
+        flexWrap: 'wrap',
     },
     heroPortrait: {
-        textAlign: 'center'
+        textAlign: 'center',
+        padding: '8px'
     }
 };
 
@@ -24,13 +23,21 @@ class TeamComp extends Component {
         } = this.props;
 
         return teamComp.map(heroID => {
-            const hero = heroes.find(aHero => aHero.name === heroID);
-            const player = teamPlayers.find(aPlayer => aPlayer.hero === hero.name) || {};
+            const hero = heroes.find(aHero => aHero.attributeId === heroID);
+            if (teamPlayers) {
+                const player = teamPlayers.find(aPlayer => aPlayer.hero === hero.attributeId) || {};
+                return (
+                    <div key={hero.name} className={classes.heroPortrait}>
+                        <div><HeroPortrait hero={hero} hideLink /></div>
+                        <span >{player.playerName}</span>
+                    </div>
+                );
+            }
+
             return (
-                <Grid item xs={4} sm={3} md={2} key={hero.name} className={classes.heroPortrait}>
+                <div key={hero.name} className={classes.heroPortrait}>
                     <div><HeroPortrait hero={hero} hideLink /></div>
-                    <span >{player.playerName}</span>
-                </Grid>
+                </div>
             );
         });
     }

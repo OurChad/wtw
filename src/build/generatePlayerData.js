@@ -147,7 +147,7 @@ function groupByTeamComp(replays, blizzID) {
 }
 
 function addCompositionToTeamCompMap(gameData, teamPlayers, isWin) {
-    const compMapKey = teamPlayers.map(player => player.hero.name)
+    const compMapKey = teamPlayers.map(player => player.hero.attribute_id)
         .sort(sortHeroNames) // Sort hero names so key is always the same
         .reduce((keyAcc, name) => {
             keyAcc += name;
@@ -156,7 +156,7 @@ function addCompositionToTeamCompMap(gameData, teamPlayers, isWin) {
 
     const teamPlayersData = teamPlayers.reduce((playersAcc, player) => {
         playersAcc.push({
-            hero: player.hero.name,
+            hero: player.hero.attribute_id,
             blizzID: player.blizz_id,
             playerName: players[`${player.blizz_id}`]
         });
@@ -164,8 +164,8 @@ function addCompositionToTeamCompMap(gameData, teamPlayers, isWin) {
         return playersAcc;
     }, []);
 
-    const winningTeamComp = gameData.players.filter(player => player.winner).map(player => player.hero.name);
-    const losingTeamComp = gameData.players.filter(player => !player.winner).map(player => player.hero.name);
+    const winningTeamComp = gameData.players.filter(player => player.winner).map(player => player.hero.attribute_id);
+    const losingTeamComp = gameData.players.filter(player => !player.winner).map(player => player.hero.attribute_id);
 
     const compData = {
         gameID: gameData.id,

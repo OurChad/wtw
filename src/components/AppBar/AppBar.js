@@ -93,6 +93,11 @@ class WTWAppBar extends React.PureComponent {
                             Players
                         </Typography>
                         {this.renderPlayerMenuItem()}
+                        <Divider />
+                        <MenuItem tabIndex={0} onClick={() => {
+                            this.toggleMenu(false)();
+                            navigate('/teamcomps');
+                        }}>Team Comps</MenuItem>
                     </div>
                 </SwipeableDrawer>
             </div>
