@@ -21,9 +21,6 @@ const styles = {
         display: 'flex',
         flexWrap: 'wrap',
     },
-    filters: {
-        color: '#fff'
-    },
     colorSwitchBase: {
         color: 'var(--primary-theme-color)',
         '&$colorChecked': {
@@ -42,7 +39,12 @@ class TeamCompDetailsContainer extends Component {
     constructor(props) {
         super(props);
 
-        const allTeamComps = this.generateTeamComps();
+        const allTeamComps = this.generateTeamComps();        
+        const pagination = {
+            pageSize: 10,
+            currentPage: 1,
+            numberOfPages: Math.ceil(allTeamComps / 10)
+        };
         const compSizeOptions = [
             {
                 size: 2,
@@ -67,23 +69,46 @@ class TeamCompDetailsContainer extends Component {
         ];
         const filtering = { 
             compSizeOptions, 
-            compSizeOrdering: 'asc' 
+            compSizeOrdering: 'asc',
+            pagination, 
         };
+        const teamCompValues = Object.values(allTeamComps);
+        const sortedTeamComps = this.filterAndSortTeamComps(_.flattenDeep(teamCompValues), filtering);
         this.state = {
             allTeamComps,
-            filtering
+            sortedTeamComps,
+            filtering,
+            currentPage: 1,
         };
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        const { allTeamComps, filtering } = this.state;
+        if (!_.isEqual(prevState.filtering, filtering)) {
+            const teamCompValues = Object.values(allTeamComps);
+            const sortedTeamComps = this.filterAndSortTeamComps(_.flattenDeep(teamCompValues), filtering);
+
+            this.setState({ sortedTeamComps });
+        }
     }
 
     filterAndSortTeamComps = (teamComps, filtering) => {
         const compSizeSelectedFilters = filtering.compSizeOptions.filter(compSizeOption => compSizeOption.selected)
             .map(compSizeFilter => compSizeFilter.size);
-        const sortedTeams = _(teamComps)
+        const sortedTeamComps = _(teamComps)
             .filter(teamComp => compSizeSelectedFilters.includes(teamComp.heroes.length))    
             .orderBy(teamComp => teamComp.heroes.length, filtering.compSizeOrdering)
             .value();
 
-        return sortedTeams;
+        return sortedTeamComps;
+    }
+
+    applyPagination = (teamComps) => {
+        const { filtering: { pagination: { pageSize, currentPage } } } = this.state;
+        const lastIndex = teamComps.length > (pageSize * currentPage) ? (pageSize * currentPage) : teamComps.length; // use of slice means we want past the last index
+        const firstIndex = lastIndex - pageSize >= 0 ? lastIndex - pageSize : 0;
+
+        return teamComps.slice(firstIndex, lastIndex);
     }
 
     generateTeamComps = () => {
@@ -160,18 +185,20 @@ class TeamCompDetailsContainer extends Component {
 
     renderFilterControls = () => {
         const { classes } = this.props;
-        const { filtering: { compSizeOptions } } = this.state;
-        const handleFilterChange = (compSizeOption) => () => {
-            compSizeOption.selected = !compSizeOption.selected;
-            const updatedFilterOptions = compSizeOptions.map((option) => {
-                if (option.size === compSizeOption.size) {
-                    return compSizeOption;
+        const { filtering } = this.state;
+        const handleFilterChange = (compSizeOption) => () => {            
+            const updatedCompSizeOptions = filtering.compSizeOptions.map((option) => {
+                const newOption = Object.assign({}, option); // clone object to avoid mutating original
+                if (newOption.size === compSizeOption.size) {
+                    newOption.selected = !newOption.selected;
                 }
 
-                return option;
+                return newOption;
             });
-
-            this.setState({ filtering: {compSizeOptions: updatedFilterOptions}});
+            const newFiltering = _.cloneDeep(filtering);
+            newFiltering.compSizeOptions = updatedCompSizeOptions;
+            
+            this.setState({filtering: newFiltering});
         };
 
         const filterStyles = {
@@ -184,7 +211,7 @@ class TeamCompDetailsContainer extends Component {
         return (
             <FormGroup row>
                 {
-                    compSizeOptions.map(compSizeOption => {
+                    filtering.compSizeOptions.map(compSizeOption => {
                         return (
                             <StyledFormControlLabel
                                 key={compSizeOption.label}
@@ -212,11 +239,10 @@ class TeamCompDetailsContainer extends Component {
 
     renderTeamComps = () => {
         const { classes } = this.props;
-        const { allTeamComps, filtering } = this.state;
-        const teamCompValues = Object.values(allTeamComps);
-        const sortedTeamComps = this.filterAndSortTeamComps(_.flattenDeep(teamCompValues), filtering);
+        const { sortedTeamComps } = this.state;      
+        const paginatedTeamComps = this.applyPagination(sortedTeamComps);
 
-        const teamCompCards = sortedTeamComps.map(teamComp => {
+        const teamCompCards = paginatedTeamComps.map(teamComp => {
             return (
                 <TeamCompDetails key={teamComp.key} teamComp={teamComp} />
             );
