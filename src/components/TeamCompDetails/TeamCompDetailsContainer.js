@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
+import styled from 'styled-components';
 import { withAppContext } from '../../context/withAppContext';
 import TeamCompDetails from './TeamCompDetails';
 import TeamComp from '../TeamComp';
-import {Typography, } from '@material-ui/core';
+import Pagination from '../common/Pagination';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import { Typography } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = {
@@ -39,12 +41,7 @@ class TeamCompDetailsContainer extends Component {
     constructor(props) {
         super(props);
 
-        const allTeamComps = this.generateTeamComps();        
-        const pagination = {
-            pageSize: 10,
-            currentPage: 1,
-            numberOfPages: Math.ceil(allTeamComps / 10)
-        };
+        const allTeamComps = this.generateTeamComps(); 
         const compSizeOptions = [
             {
                 size: 2,
@@ -67,18 +64,18 @@ class TeamCompDetailsContainer extends Component {
                 selected: false
             },
         ];
+
         const filtering = { 
             compSizeOptions, 
-            compSizeOrdering: 'asc',
-            pagination, 
+            compSizeOrdering: 'asc'
         };
         const teamCompValues = Object.values(allTeamComps);
         const sortedTeamComps = this.filterAndSortTeamComps(_.flattenDeep(teamCompValues), filtering);
+
         this.state = {
             allTeamComps,
             sortedTeamComps,
             filtering,
-            currentPage: 1,
         };
     }
 
@@ -88,7 +85,7 @@ class TeamCompDetailsContainer extends Component {
             const teamCompValues = Object.values(allTeamComps);
             const sortedTeamComps = this.filterAndSortTeamComps(_.flattenDeep(teamCompValues), filtering);
 
-            this.setState({ sortedTeamComps });
+            this.setState({ sortedTeamComps, filtering });
         }
     }
 
@@ -101,14 +98,6 @@ class TeamCompDetailsContainer extends Component {
             .value();
 
         return sortedTeamComps;
-    }
-
-    applyPagination = (teamComps) => {
-        const { filtering: { pagination: { pageSize, currentPage } } } = this.state;
-        const lastIndex = teamComps.length > (pageSize * currentPage) ? (pageSize * currentPage) : teamComps.length; // use of slice means we want past the last index
-        const firstIndex = lastIndex - pageSize >= 0 ? lastIndex - pageSize : 0;
-
-        return teamComps.slice(firstIndex, lastIndex);
     }
 
     generateTeamComps = () => {
@@ -197,25 +186,17 @@ class TeamCompDetailsContainer extends Component {
             });
             const newFiltering = _.cloneDeep(filtering);
             newFiltering.compSizeOptions = updatedCompSizeOptions;
-            
+
             this.setState({filtering: newFiltering});
         };
 
-        const filterStyles = {
-            label: {
-                color: '#fff'
-            }
-        };
-        const StyledFormControlLabel = withStyles(filterStyles)(FormControlLabel);
-
         return (
-            <FormGroup row>
+            <StyledFormGroup row>
                 {
                     filtering.compSizeOptions.map(compSizeOption => {
                         return (
                             <StyledFormControlLabel
-                                key={compSizeOption.label}
-                                className={classes.filter}
+                                key={compSizeOption.label}                                
                                 control={
                                     <Switch
                                         checked={compSizeOption.selected}
@@ -233,16 +214,13 @@ class TeamCompDetailsContainer extends Component {
                         );
                     })
                 }
-            </FormGroup>
+            </StyledFormGroup>
         );
     }
 
-    renderTeamComps = () => {
+    renderTeamComps = (sortedTeamComps) => {
         const { classes } = this.props;
-        const { sortedTeamComps } = this.state;      
-        const paginatedTeamComps = this.applyPagination(sortedTeamComps);
-
-        const teamCompCards = paginatedTeamComps.map(teamComp => {
+        const teamCompCards = sortedTeamComps.map(teamComp => {
             return (
                 <TeamCompDetails key={teamComp.key} teamComp={teamComp} />
             );
@@ -255,16 +233,44 @@ class TeamCompDetailsContainer extends Component {
         );
     }
 
+    changePage = (toNextPage = true) => () => {
+        const { filtering } = this.state;
+        const newFiltering = _.cloneDeep(filtering);
+        const { currentPage, numberOfPages } = newFiltering.pagination;
+        if (toNextPage && currentPage !== numberOfPages) {
+            ++newFiltering.pagination.currentPage;
+        } else if (!toNextPage && currentPage > 1) {
+            --newFiltering.pagination.currentPage;
+        }
+
+        this.setState({filtering: newFiltering});
+    }
+
     render() {
         const { classes } = this.props;
+        const { sortedTeamComps } = this.state;
         return (
             <div>
                 <Typography className={classes.pageTitle}>Team Comps</Typography>
                 { this.renderFilterControls() }
-                { this.renderTeamComps() }
+                <Pagination items={sortedTeamComps} renderItems={this.renderTeamComps} />
             </div>
         );
     }
 }
 
 export default withStyles(styles)(withAppContext(TeamCompDetailsContainer));
+
+const StyledFormGroup = styled(FormGroup)`
+    display: flex;
+    justify-content: flex-end;
+    & > label > span {
+        color: #fff !important;
+    }
+`;
+
+const StyledFormControlLabel = styled(FormControlLabel)`
+    &:last-child {
+        margin-right: 0;
+    }
+`;

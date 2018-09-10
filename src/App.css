@@ -1,6 +1,8 @@
 :root {
   --primary-theme-color: #524763;
+  --primary-theme-color-rgb: 82,71,99;
   --secondary-theme-color: #82D8D8;
+  --secondary-theme-color-rgb: 130,216,216;
   --primary-dark-color: #333;
 }
 
