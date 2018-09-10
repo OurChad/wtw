@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { withAppContext } from '../../context/withAppContext';
 import { withStyles } from '@material-ui/core/styles';
 import HeroPortrait from '../HeroPortrait';
+import Typography from '../common/Typography';
 
 const styles = {
     teamCompContainer: {
@@ -29,7 +30,7 @@ class TeamComp extends Component {
                 return (
                     <div key={hero.name} className={classes.heroPortrait}>
                         <div><HeroPortrait hero={hero} hideLink /></div>
-                        <span >{player.playerName}</span>
+                        <Typography>{player.playerName}</Typography>
                     </div>
                 );
             }

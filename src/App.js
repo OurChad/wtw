@@ -7,6 +7,7 @@ import HeroList from './components/HeroList';
 import HeroDetails from './components/HeroDetails';
 import PlayerDetails from './components/PlayerDetails/PlayerDetails';
 import TeamCompDetailsContainer from './components/TeamCompDetails/TeamCompDetailsContainer';
+import GameDetails from './components/GameDetails';
 
 class App extends Component {
 
@@ -28,6 +29,7 @@ class App extends Component {
                             <HeroDetails path='/player/:player/hero/:heroName' />
                             <HeroDetails path='/hero/:heroName' />
                             <TeamCompDetailsContainer path='/teamcomps' />
+                            <GameDetails path='/:teamCompID/games' />
                         </Router>
                     </div>
                 </AppContext.Provider>

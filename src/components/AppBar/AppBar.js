@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, navigate } from '@reach/router';
 import PropTypes from 'prop-types';
+import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -9,7 +10,9 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Typography from '@material-ui/core/Typography';
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import Divider from '@material-ui/core/Divider';
+import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import Hidden from '@material-ui/core/Hidden';
 
 const styles = theme => ({
     root: {
@@ -32,6 +35,11 @@ const styles = theme => ({
     },
     menuTitle: {
         padding: '16px 16px 8px 16px'
+    },
+    menuButtonsWrapper: {
+        display: 'flex',
+        justifyContent: 'flex-end',
+        width: '100%',
     }
 });
 
@@ -44,6 +52,7 @@ class WTWAppBar extends React.PureComponent {
     toggleMenu = (open) => () => {
         this.setState({
             menuOpen: open,
+            anchorEl: null,
         });
     };
 
@@ -59,22 +68,67 @@ class WTWAppBar extends React.PureComponent {
         });
     }
 
+    handleMenu = event => {
+        this.setState({ anchorEl: event.currentTarget });
+    };
+
     render() {
         const { classes } = this.props;
+        const { anchorEl } = this.state;
+        const open = Boolean(anchorEl);
         return (
             <div className={classes.root}>
                 <AppBar position="static" className={classes.appBar}>
                     <Toolbar>
-                        <IconButton
-                            color="inherit"
-                            aria-label="Open drawer"
-                            onClick={this.toggleMenu(true)}
-                        >
-                            <MenuIcon />
-                        </IconButton>
+                        <Hidden mdUp>
+                            <IconButton
+                                color="inherit"
+                                aria-label="Open drawer"
+                                onClick={this.toggleMenu(true)}
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                        </Hidden>
                         <Typography variant="title" color="inherit">
                             <Link to='/'>WTW</Link>
                         </Typography>
+                        <div className={classes.menuButtonsWrapper}>
+                            <Hidden smDown>
+                                <Button
+                                    onClick={() => {
+                                        this.toggleMenu(false)();
+                                        navigate('/teamcomps');
+                                    }}
+                                    color="inherit"
+                                >
+                            Team Comps
+                                </Button>
+                                <Button
+                                    aria-owns={open ? 'menu-appbar' : null}
+                                    aria-haspopup="true"
+                                    onClick={this.handleMenu}
+                                    color="inherit"
+                                >
+                            Players
+                                </Button>
+                                <Menu
+                                    id="menu-appbar"
+                                    anchorEl={anchorEl}
+                                    anchorOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right',
+                                    }}
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right',
+                                    }}
+                                    open={open}
+                                    onClose={this.handleClose}
+                                >
+                                    {this.renderPlayerMenuItem()}
+                                </Menu>
+                            </Hidden>
+                        </div>
                     </Toolbar>
                 </AppBar>
                 <SwipeableDrawer

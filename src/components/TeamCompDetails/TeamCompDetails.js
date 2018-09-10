@@ -4,8 +4,9 @@ import {Typography} from '@material-ui/core';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
-import Button from '@material-ui/core/Button';
+import Button from '../common/Button';
 import { withStyles } from '@material-ui/core/styles';
+import { Link } from '@reach/router';
 
 const styles = {
     teamComp: {
@@ -28,6 +29,7 @@ class TeamCompDetails extends PureComponent {
 
     renderTeamComp = (teamComp) => {
         const { classes } = this.props;
+        const gameDetailsLink = `/${teamComp.key}/games`;
         return (
             <Card key={teamComp.key} className={classes.card}>
                 <CardContent>
@@ -60,7 +62,7 @@ class TeamCompDetails extends PureComponent {
                     </div>
                 </CardContent>
                 <CardActions>
-                    <Button size="small" onClick={() => {}}>Game Details</Button>
+                    <Link to={gameDetailsLink}><Button primary>Game Details</Button></Link>
                 </CardActions>
             </Card>
         );
