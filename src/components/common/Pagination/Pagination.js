@@ -42,10 +42,12 @@ export default class Pagination extends Component {
         const prevItems = prevProps.items;
         const { items } = this.props;
         if (prevItems.length !== items.length || !_.isEqual(prevItems[0], items[0])) {
+            const numberOfPages = Math.ceil(items.length / 10);
+            const currentPage = numberOfPages > 0 ? 1 : 0;
             const newState = {
                 pageSize: 10,
-                currentPage: 1,
-                numberOfPages: Math.ceil(items.length / 10)
+                currentPage,
+                numberOfPages,
             };
 
             this.setState(newState);
@@ -87,8 +89,8 @@ export default class Pagination extends Component {
                     <StyledTypography>Page: {currentPage} of {numberOfPages}</StyledTypography>
                 </PageInfoLabel>
                 <PaginationButtonsContainer>
-                    <Button handleOnClick={this.changePage(false)} disabled={currentPage === 1}><StyledTypography>Previous Page</StyledTypography></Button>
-                    <Button primary handleOnClick={this.changePage()} disabled={currentPage === numberOfPages}><StyledTypography>Next Page</StyledTypography></Button>
+                    <Button handleOnClick={this.changePage(false)} disabled={currentPage <= 1}><StyledTypography>Previous Page</StyledTypography></Button>
+                    <Button primary handleOnClick={this.changePage()} disabled={numberOfPages === 0 || currentPage === numberOfPages}><StyledTypography>Next Page</StyledTypography></Button>
                 </PaginationButtonsContainer>
             </PaginationContainer>
         );

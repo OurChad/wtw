@@ -43,7 +43,7 @@ async function getReplaysPaged(params, page = 1) {
         if (error.response.status === 429) {
             console.log('Too many requests made to HotSAPI. Timing out for 30 seconds.');
             await sleep(30000);
-            const nextReplays = await getReplaysPaged(params, ++page);
+            const nextReplays = await getReplaysPaged(params, page);
             allReplays = allReplays.concat(nextReplays);
         }
     }
